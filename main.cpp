@@ -23,14 +23,52 @@ struct Uzytkownik {
 vector <Przyjaciel> adresaci;
 vector <Uzytkownik> zarejestrowani;
 
-void DodajAdresataDoWektora (const int id, const int idUzytkownika, const string& Imie, const string& Nazwisko,
-                             const string& NrTelefonu, const string& Email, const string& Adres) {
-    adresaci.push_back({id, idUzytkownika, Imie, Nazwisko, NrTelefonu, Email, Adres});
-}
 void DodajZarejestrowanegoDoWektora (const int idUzytkownika, const string& nazwa, const string& haslo) {
     zarejestrowani.push_back({idUzytkownika, nazwa, haslo});
 }
 
+void Rejestracja (int IloscUzytkownikow) {
+    string nazwa, haslo;
+    int idUzytkownika;
+    cout << "Podaj nazwe uzytkownika:";
+    cin >> nazwa;
+    int i = 0;
+
+    while (i < zarejestrowani.size()) {
+        if (zarejestrowani[i].nazwa == nazwa) {
+            cout << "Taki uzytkownik istnieje, wpisz inna nazwe: ";
+            cin >> nazwa;
+            i = 0;
+        } else {
+            i++;
+        }
+    }
+
+    cout << "Podaj haslo:";
+    cin >> haslo;
+    if (zarejestrowani.empty() == true) {
+        idUzytkownika = 1;
+    } else {
+        idUzytkownika = zarejestrowani.back().idUzytkownika + 1;
+    }
+
+    DodajZarejestrowanegoDoWektora(idUzytkownika, nazwa, haslo);
+    cout << "Konto zostalo poprawnie zalozone.";
+    Sleep(1000);
+
+    fstream plik;
+    plik.open("DaneUzytkownikow.txt",ios::out | ios::app);
+
+    if (plik.good() == true) {
+        plik << idUzytkownika << "|" << nazwa << "|" << haslo;
+        plik << endl;
+        plik.close();
+        cout << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
+        Sleep(1000);
+    } else {
+        cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
+    }
+}
 Uzytkownik WczytajDaneDoLogowania(string DaneUzytkownika) {
     Uzytkownik pobrane;
     string ZnakPodzialu = "|";
@@ -60,58 +98,17 @@ Uzytkownik WczytajDaneDoLogowania(string DaneUzytkownika) {
     return   pobrane;
 }
 
-int Rejestracja (int IloscUzytkownikow) {
-    string nazwa, haslo;
-    cout << "Podaj nazwe uzytkownika:";
-    cin >> nazwa;
-    int i = 0;
 
-    while (i < IloscUzytkownikow) {
-        if (zarejestrowani[i].nazwa == nazwa) {
-            cout << "Taki uzytkownik istnieje, wpisz inna nazwe: ";
-            cin >> nazwa;
-            i = 0;
-        } else {
-            i++;
-        }
-    }
-
-    cout << "Podaj haslo:";
-    cin >> haslo;
-    int idUzytkownika = IloscUzytkownikow + 1;
-    DodajZarejestrowanegoDoWektora(idUzytkownika, nazwa, haslo);
-    cout << "Konto zostalo poprawnie zalozone.";
-    Sleep(1000);
-
-    vector<Przyjaciel>::iterator it;
-    it = adresaci.begin();
-    fstream plik;
-    plik.open("DaneUzytkownikow.txt",ios::out | ios::app);
-
-    if (plik.good() == true) {
-        plik << idUzytkownika << "|" << nazwa << "|" << haslo;
-        plik  << endl;
-        it++;
-        plik.close();
-        cout << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
-        Sleep(1000);
-    } else {
-        cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
-    }
-
-    return IloscUzytkownikow + 1;
-}
-
-int Logowanie(vector <Uzytkownik>& zarejestrowani, int IloscUzytkownikow) {
+int Logowanie(vector <Uzytkownik>& zarejestrowani) {
     string nazwa, haslo;
     cout << "Podaj nazwe uzytkownika:";
     cin >> nazwa;
 
     int i = 0;
-    while (i < IloscUzytkownikow) {
+    while (i < zarejestrowani.size()) {
         if (zarejestrowani[i].nazwa == nazwa) {
-            for (int k = 0; k < 3; k++) {
-                cout << "Podaj haslo. Pozostalo prob " << 3 - k << ":";
+            for (int proba = 0; proba < 3; proba++) {
+                cout << "Podaj haslo. Pozostalo prob " << 3 - proba << ":";
                 cin >> haslo;
 
                 if (zarejestrowani[i].haslo == haslo) {
@@ -186,109 +183,122 @@ Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata) {
     plik.close();
     return   pobrane;
 }
-
-int DodajAdresata (int IloscPrzyjaciol, int IdZalogowanegoUzytkownika) {
-    string Imie, Nazwisko, NrTelefonu, Email, Adres, DaneAdresata;
-    int id, idUzytkownika;
-    int idPrzyjaciela;
+void DopiszAdresataDoPliku (Przyjaciel przyjaciele) {
     fstream plik;
-
-    vector<Przyjaciel>::iterator it;
-    it = adresaci.begin();
-
-    if ( adresaci.size() != 0) {
-        idPrzyjaciela = adresaci[IloscPrzyjaciol - 1].id + 1;
-    } else {
-        idPrzyjaciela = IloscPrzyjaciol+1;
-    }
-    id = idPrzyjaciela;
-    idUzytkownika = IdZalogowanegoUzytkownika;
-
-    cout << "Podaj imie przyjaciela:";
-    cin >> Imie;
-    cout << "Podaj nazwisko przyjaciela:";
-    cin >> Nazwisko;
-    cout << "Podaj nr telefonu przyjaciela:";
-    cin.sync();
-    getline(cin, NrTelefonu);
-    cout << "Podaj e-mail przyjaciela:";
-    cin >> Email;
-    cout << "Podaj adres przyjaciela:";
-    cin.sync();
-    getline(cin, Adres);
-
-    DodajAdresataDoWektora(id, idUzytkownika, Imie, Nazwisko, NrTelefonu, Email, Adres);
-
     plik.open("KsiazkaAdresowa.txt",ios::out | ios::app);
 
     if (plik.good() == true) {
-        plik << idPrzyjaciela << "|" << idUzytkownika << "|" << Imie << "|" << Nazwisko << "|" << NrTelefonu << "|" << Email << "|" << Adres << "|";
-        plik  << endl;
-        it++;
+        plik << przyjaciele.id << "|" << przyjaciele.idUzytkownika << "|" << przyjaciele.Imie << "|"
+             << przyjaciele.Nazwisko << "|" << przyjaciele.NrTelefonu << "|" << przyjaciele.Email << "|"
+             << przyjaciele.Adres << "|";
+        plik << endl;
         plik.close();
         cout << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
         Sleep(1000);
     } else {
         cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
     }
-    return IloscPrzyjaciol + 1;
+}
+
+void DodajAdresata (vector <Przyjaciel>& adresaci, int IdZalogowanegoUzytkownika) {
+
+    string Imie, Nazwisko, NrTelefonu, Email, Adres, DaneAdresata;
+    Przyjaciel przyjaciele;
+    przyjaciele.idUzytkownika = IdZalogowanegoUzytkownika;
+
+    system("cls");
+    cout << ">>> DODAWANIE NOWEGO ADRESATA <<<" << endl << endl;
+
+    if (adresaci.empty() == true) {
+        przyjaciele.id = 1;
+    } else {
+        przyjaciele.id = adresaci.back().id + 1;
+    }
+    int id = przyjaciele.id;
+
+    cout << "Podaj imie: ";
+    cin >> Imie;
+    przyjaciele.Imie = Imie;
+    cout << "Podaj nazwisko: ";
+    cin >> Nazwisko;
+    przyjaciele.Nazwisko  = Nazwisko;
+    cout << "Podaj numer telefonu: ";
+    cin.sync();
+    getline(cin, NrTelefonu);
+    przyjaciele.NrTelefonu = NrTelefonu;
+    cout << "Podaj email: ";
+    cin >> Email;
+    przyjaciele.Email = Email;
+    cout << "Podaj adres: ";
+    cin.sync();
+    getline(cin, Adres);
+    przyjaciele.Adres = Adres;
+
+    adresaci.push_back(przyjaciele);
+    system("pause");
+
+    DopiszAdresataDoPliku(przyjaciele);
 }
 
 void WypiszDanePrzyjaciela(vector < Przyjaciel > &adresaci, int indeks) {
-    cout << adresaci[indeks].id << " | " << adresaci[indeks].idUzytkownika << " | " << adresaci[indeks].Imie << " | "
-         << adresaci[indeks].Nazwisko << " | " << adresaci[indeks].NrTelefonu << " | "
-         << adresaci[indeks].Email << " | " << adresaci[indeks].Adres << endl;
+    cout << "Id:   " << adresaci[indeks].id << endl;
+    cout << "Imie:   " << adresaci[indeks].Imie << endl;
+    cout << "Nazwisko:   " << adresaci[indeks].Nazwisko << endl;
+    cout << "Numer telefonu:   " << adresaci[indeks].NrTelefonu << endl;
+    cout << "Email:   " << adresaci[indeks].Email << endl;
+    cout << "Adres:  " << adresaci[indeks].Adres << endl;
     cout << endl;
 }
 
-int WyswietlKsiazkeAdresowa ( vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
-    int i=0;
-    while (!adresaci.empty()) {
-        if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika) {
-            WypiszDanePrzyjaciela(adresaci, i);
-            i++;
-            system("pause");
-        } else {
-            return 0;
+void wypiszWszystkichAdresatow(vector<Przyjaciel> &adresaci, int IdZalogowanegoUzytkownika) {
+    system("cls");
+    if (!adresaci.empty()) {
+        for (vector<Przyjaciel>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++) {
+            if (itr->idUzytkownika == IdZalogowanegoUzytkownika) {
+                cout << "Id:                 " << itr->id << endl;
+                cout << "Imie:               " << itr->Imie << endl;
+                cout << "Nazwisko:           " << itr->Nazwisko << endl;
+                cout << "Numer telefonu:     " << itr->NrTelefonu << endl;
+                cout << "Email:              " << itr->Email << endl;
+                cout << "Adres:              " << itr->Adres << endl << endl;
+            }
         }
+        cout << endl;
+    } else {
+        cout << "Ksiazka adresowa jest pusta." << endl << endl;
     }
+    system("pause");
 }
 
 int WyszukajNazwisko(vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
-    string Nazwisko;
+    string Nazwisko = "";
     cout << "Podaj nazwisko przyjaciela:";
     cin >> Nazwisko;
 
-    int i = 0;
     while (!adresaci.empty()) {
-        if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika && adresaci[i].Nazwisko == Nazwisko) {
-            WypiszDanePrzyjaciela(adresaci, i);
-            i++;
-            system("pause");
-        } else if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika || adresaci[i].Nazwisko != Nazwisko) {
-            i++;
-        } else {
-            return 0;
+        for (int i=0; i < adresaci.size(); i++) {
+            if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika && adresaci[i].Nazwisko == Nazwisko) {
+                WypiszDanePrzyjaciela(adresaci, i);
+                system("pause");
+            }
         }
+        return 0;
     }
 }
 
 int WyszukajImie(vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
-    string Imie;
+    string Imie = "";
     cout << "Podaj imie przyjaciela:";
     cin >> Imie;
 
-    int i = 0;
     while (!adresaci.empty()) {
-        if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika && adresaci[i].Imie == Imie) {
-            WypiszDanePrzyjaciela(adresaci, i);
-            i++;
-            system("pause");
-        } else if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika || adresaci[i].Imie != Imie) {
-            i++;
-        } else {
-            return 0;
+        for (int i=0; i < adresaci.size(); i++) {
+            if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika && adresaci[i].Imie == Imie) {
+                WypiszDanePrzyjaciela(adresaci, i);
+                system("pause");
+            }
         }
+        return 0;
     }
 }
 
@@ -307,7 +317,6 @@ void NadpiszPlik (vector < Przyjaciel > &adresaci) {
 
 void UsunAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
     int id = 0;
-
     vector<Przyjaciel>::iterator it;
     it = adresaci.begin();
 
@@ -410,8 +419,6 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
 int main() {
     setlocale(LC_ALL, "Polish");
 
-    int IloscPrzyjaciol = 0;
-    int IdPrzyjaciela = 0;
     int IdZalogowanegoUzytkownika = 0;
     int IloscUzytkownikow = 0;
     char wybor;
@@ -420,8 +427,6 @@ int main() {
 
     WczytajZKsiazkiAdresowejWpis(DaneAdresata);
     WczytajDaneDoLogowania(DaneUzytkownika);
-    IloscPrzyjaciol = adresaci.size();
-    IloscUzytkownikow = zarejestrowani.size();
 
     while(1) {
         if (IdZalogowanegoUzytkownika == 0) {
@@ -433,10 +438,9 @@ int main() {
             cin >> wybor;
 
             if (wybor == '1') {
-                // cout << IloscUzytkownikow;
-                IloscUzytkownikow = Rejestracja (IloscUzytkownikow);
+                Rejestracja (IloscUzytkownikow);
             } else if (wybor == '2') {
-                IdZalogowanegoUzytkownika = Logowanie(zarejestrowani, IloscUzytkownikow);
+                IdZalogowanegoUzytkownika = Logowanie(zarejestrowani);
             } else if (wybor == '9') {
                 exit(0);
             }
@@ -455,13 +459,13 @@ int main() {
 
             cin >> wybor;
             if (wybor == '1') {
-                IloscPrzyjaciol = DodajAdresata (IloscPrzyjaciol, IdZalogowanegoUzytkownika);
+                DodajAdresata (adresaci, IdZalogowanegoUzytkownika);
             } else if (wybor == '2') {
                 WyszukajImie(adresaci, IdZalogowanegoUzytkownika);
             } else if (wybor == '3') {
                 WyszukajNazwisko(adresaci, IdZalogowanegoUzytkownika);
             } else if (wybor == '4') {
-                WyswietlKsiazkeAdresowa(adresaci,IdZalogowanegoUzytkownika);
+                wypiszWszystkichAdresatow(adresaci,IdZalogowanegoUzytkownika);
             } else if (wybor == '5') {
                 UsunAdresata(adresaci, IdZalogowanegoUzytkownika);
             } else if (wybor == '6') {
