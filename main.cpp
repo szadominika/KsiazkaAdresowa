@@ -107,7 +107,6 @@ int OkreslOstatniNrIdUzytkownika (string Linia) {
     plik.open("KsiazkaAdresowa.txt", ios::in);
 
     if (plik.good() == false) {
-     //   cout<<"Nie mozna otworzyc pliku!";
         IdAdresata = 0;
     }
 
@@ -270,18 +269,16 @@ void WypiszDanePrzyjaciela(vector < Przyjaciel > &adresaci, int indeks) {
     cout << endl;
 }
 
-void wypiszWszystkichAdresatow(vector<Przyjaciel> &adresaci, int IdZalogowanegoUzytkownika) {
+void wypiszWszystkichAdresatow(vector<Przyjaciel> &adresaci) {
     system("cls");
     if (!adresaci.empty()) {
         for (vector<Przyjaciel>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++) {
-            if (itr->idUzytkownika == IdZalogowanegoUzytkownika) {
                 cout << "Id:                 " << itr->id << endl;
                 cout << "Imie:               " << itr->Imie << endl;
                 cout << "Nazwisko:           " << itr->Nazwisko << endl;
                 cout << "Numer telefonu:     " << itr->NrTelefonu << endl;
                 cout << "Email:              " << itr->Email << endl;
                 cout << "Adres:              " << itr->Adres << endl << endl;
-            }
         }
         cout << endl;
     } else {
@@ -290,14 +287,14 @@ void wypiszWszystkichAdresatow(vector<Przyjaciel> &adresaci, int IdZalogowanegoU
     system("pause");
 }
 
-int WyszukajNazwisko(vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
+int WyszukajNazwisko(vector < Przyjaciel > &adresaci) {
     string Nazwisko = "";
     cout << "Podaj nazwisko przyjaciela:";
     cin >> Nazwisko;
 
     while (!adresaci.empty()) {
         for (int i=0; i < adresaci.size(); i++) {
-            if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika && adresaci[i].Nazwisko == Nazwisko) {
+            if (adresaci[i].Nazwisko == Nazwisko) {
                 WypiszDanePrzyjaciela(adresaci, i);
                 system("pause");
             }
@@ -306,14 +303,14 @@ int WyszukajNazwisko(vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
     }
 }
 
-int WyszukajImie(vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
+int WyszukajImie(vector < Przyjaciel > &adresaci) {
     string Imie = "";
     cout << "Podaj imie przyjaciela:";
     cin >> Imie;
 
     while (!adresaci.empty()) {
         for (int i=0; i < adresaci.size(); i++) {
-            if (adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika && adresaci[i].Imie == Imie) {
+            if (adresaci[i].Imie == Imie) {
                 WypiszDanePrzyjaciela(adresaci, i);
                 system("pause");
             }
@@ -322,9 +319,11 @@ int WyszukajImie(vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika)
     }
 }
 
-void NadpiszPlik (vector < Przyjaciel > &adresaci) {
+
+
+void DodajDoPlikuTymczasowego (vector < Przyjaciel > &adresaci) {
     fstream plik;
-    plik.open("KsiazkaAdresowa.txt",ios::trunc | ios::out);
+    plik.open("KsiazkaAdresowaTymczasowa.txt",ios::out|ios::trunc /*| ios::app*/);
 
     if (plik.good() == true) {
         for (int i = 0; i < adresaci.size(); i++) {
@@ -335,7 +334,7 @@ void NadpiszPlik (vector < Przyjaciel > &adresaci) {
     }
 }
 
-void UsunAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
+void UsunAdresata (vector < Przyjaciel > &adresaci) {
     int id = 0;
     vector<Przyjaciel>::iterator it;
     it = adresaci.begin();
@@ -343,7 +342,7 @@ void UsunAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownik
     cout << " Podaj ID przyjaciela: ";
     cin >> id;
     for ( int i = 0; i < adresaci.size(); i++) {
-        if (adresaci[i].id == id && adresaci[i].idUzytkownika == IdZalogowanegoUzytkownika) {
+        if (adresaci[i].id == id) {
             char potwierdzenie;
             cout << "Czy jestes pewny, ze chcesz usunac wpis? Jesli tak nacisnij t na klawiaturze.";
             cin >> potwierdzenie;
@@ -352,10 +351,10 @@ void UsunAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownik
             }
         }
     }
-    NadpiszPlik(adresaci);
+    DodajDoPlikuTymczasowego(adresaci);
 }
 
-void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
+void EdytujAdresata (vector < Przyjaciel > &adresaci) {
     int idPrzyjaciela = 0;
     char wybor;
     bool czyIstniejeAdresat = false;
@@ -368,7 +367,7 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
         cin >> idPrzyjaciela;
 
         for (vector<Przyjaciel>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++) {
-            if (itr->id == idPrzyjaciela && itr->idUzytkownika == IdZalogowanegoUzytkownika) {
+            if (itr->id == idPrzyjaciela) {
                 czyIstniejeAdresat = true;
 
                 cout << endl << "Ktore dane zaktualizowac: " << endl;
@@ -387,28 +386,29 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
                     cin >> Zmiana;
                     itr->Imie = Zmiana;
                     cout << "Imie zostalo zmienione.";
-                    NadpiszPlik(adresaci);
+               //     DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '2':
                     cout << "Wpisz nowe nazwisko: ";
                     cin >> Zmiana;
                     itr->Nazwisko = Zmiana;
                     cout << "Nazwisko zostalo zmienione.";
-                    NadpiszPlik(adresaci);
+                    break;
+                  //  DodajDoPlikuTymczasowego(adresaci);
                 case '3':
                     cout << "Wpisz nowy numer telefonu: ";
                     cin.sync();
                     getline(cin, Zmiana);
                     itr->NrTelefonu = Zmiana;
                     cout << "Numer telefonu zostal zmieniony.";
-                    NadpiszPlik(adresaci);
+                    DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '4':
                     cout << "Wpisz nowy adres e-mail: ";
                     cin >> Zmiana;
                     itr->Email = Zmiana;
                     cout << "Adres e-mail zostal zmieniony.";
-                    NadpiszPlik(adresaci);
+                   // DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '5':
                     cout << "Wpisz nowy adres zamieszkania: ";
@@ -416,7 +416,7 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
                     getline(cin, Zmiana);
                     itr->Adres = Zmiana;
                     cout << "Adres zamieszkania zostal zmieniony.";
-                    NadpiszPlik(adresaci);
+                   // DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '6':
                     cout << endl << "Powrot do menu glownego" << endl << endl;
@@ -425,6 +425,7 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
                     cout << endl << "Nie ma takiej opcji w menu! Powrot do menu glownego." << endl << endl;
                     break;
                 }
+                DodajDoPlikuTymczasowego(adresaci);
             }
         }
         if (czyIstniejeAdresat == false) {
@@ -481,15 +482,15 @@ int main() {
             if (wybor == '1') {
                 DodajAdresata (adresaci, IdZalogowanegoUzytkownika);
             } else if (wybor == '2') {
-                WyszukajImie(adresaci, IdZalogowanegoUzytkownika);
+                WyszukajImie(adresaci);
             } else if (wybor == '3') {
-                WyszukajNazwisko(adresaci, IdZalogowanegoUzytkownika);
+                WyszukajNazwisko(adresaci);
             } else if (wybor == '4') {
-                wypiszWszystkichAdresatow(adresaci,IdZalogowanegoUzytkownika);
+                wypiszWszystkichAdresatow(adresaci);
             } else if (wybor == '5') {
-                UsunAdresata(adresaci, IdZalogowanegoUzytkownika);
+                UsunAdresata(adresaci);
             } else if (wybor == '6') {
-                EdytujAdresata (adresaci, IdZalogowanegoUzytkownika);
+                EdytujAdresata (adresaci);
             } else if (wybor == '7') {
                 ZmianaHasla(zarejestrowani, IloscUzytkownikow, IdZalogowanegoUzytkownika);
             } else if (wybor == '8') {
