@@ -30,6 +30,7 @@ void DodajZarejestrowanegoDoWektora (const int idUzytkownika, const string& nazw
 void Rejestracja (int IloscUzytkownikow) {
     string nazwa, haslo;
     int idUzytkownika;
+    cout << ">>> REJESTRACJA NOWEGO UZYTKOWNIKA <<<" << endl << endl;
     cout << "Podaj nazwe uzytkownika:";
     cin >> nazwa;
     int i = 0;
@@ -98,6 +99,26 @@ Uzytkownik WczytajDaneDoLogowania(string DaneUzytkownika) {
     return   pobrane;
 }
 
+int OkreslOstatniNrIdUzytkownika (string Linia) {
+    int IdAdresata = 0;
+    string ZnakPodzialu = "|";
+
+    fstream plik;
+    plik.open("KsiazkaAdresowa.txt", ios::in);
+
+    if (plik.good() == false) {
+     //   cout<<"Nie mozna otworzyc pliku!";
+        IdAdresata = 0;
+    }
+
+    while (getline(plik, Linia)) {
+        Linia = Linia.substr(0, Linia.find(ZnakPodzialu));
+        IdAdresata = atoi(Linia.c_str());
+    }
+    plik.close();
+    return IdAdresata;
+}
+
 
 int Logowanie(vector <Uzytkownik>& zarejestrowani) {
     string nazwa, haslo;
@@ -142,7 +163,7 @@ void ZmianaHasla(vector <Uzytkownik>& zarejestrowani, int IloscUzytkownikow, int
     }
 }
 
-Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata) {
+Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata, int IdZalogowanegoUzytkownika ) {
     Przyjaciel pobrane;
     string ZnakPodzialu = "|";
     string Linia;
@@ -178,7 +199,9 @@ Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata) {
         pobrane.Email = DaneAdresata.substr(0, DaneAdresata.find(ZnakPodzialu));
         DaneAdresata.erase(0, DaneAdresata.find(ZnakPodzialu) + ZnakPodzialu.length());
 
-        adresaci.push_back(pobrane);
+        if (pobrane.idUzytkownika == IdZalogowanegoUzytkownika ) {
+            adresaci.push_back(pobrane);
+        }
     }
     plik.close();
     return   pobrane;
@@ -202,6 +225,7 @@ void DopiszAdresataDoPliku (Przyjaciel przyjaciele) {
 
 void DodajAdresata (vector <Przyjaciel>& adresaci, int IdZalogowanegoUzytkownika) {
 
+    string Linia;
     string Imie, Nazwisko, NrTelefonu, Email, Adres, DaneAdresata;
     Przyjaciel przyjaciele;
     przyjaciele.idUzytkownika = IdZalogowanegoUzytkownika;
@@ -209,11 +233,7 @@ void DodajAdresata (vector <Przyjaciel>& adresaci, int IdZalogowanegoUzytkownika
     system("cls");
     cout << ">>> DODAWANIE NOWEGO ADRESATA <<<" << endl << endl;
 
-    if (adresaci.empty() == true) {
-        przyjaciele.id = 1;
-    } else {
-        przyjaciele.id = adresaci.back().id + 1;
-    }
+    przyjaciele.id = OkreslOstatniNrIdUzytkownika(Linia) + 1;
     int id = przyjaciele.id;
 
     cout << "Podaj imie: ";
@@ -241,12 +261,12 @@ void DodajAdresata (vector <Przyjaciel>& adresaci, int IdZalogowanegoUzytkownika
 }
 
 void WypiszDanePrzyjaciela(vector < Przyjaciel > &adresaci, int indeks) {
-    cout << "Id:   " << adresaci[indeks].id << endl;
-    cout << "Imie:   " << adresaci[indeks].Imie << endl;
-    cout << "Nazwisko:   " << adresaci[indeks].Nazwisko << endl;
+    cout << "Id:               " << adresaci[indeks].id << endl;
+    cout << "Imie:             " << adresaci[indeks].Imie << endl;
+    cout << "Nazwisko:         " << adresaci[indeks].Nazwisko << endl;
     cout << "Numer telefonu:   " << adresaci[indeks].NrTelefonu << endl;
-    cout << "Email:   " << adresaci[indeks].Email << endl;
-    cout << "Adres:  " << adresaci[indeks].Adres << endl;
+    cout << "Email:            " << adresaci[indeks].Email << endl;
+    cout << "Adres:            " << adresaci[indeks].Adres << endl;
     cout << endl;
 }
 
@@ -425,7 +445,6 @@ int main() {
     string DaneAdresata = "";
     string DaneUzytkownika = "";
 
-    WczytajZKsiazkiAdresowejWpis(DaneAdresata);
     WczytajDaneDoLogowania(DaneUzytkownika);
 
     while(1) {
@@ -441,6 +460,7 @@ int main() {
                 Rejestracja (IloscUzytkownikow);
             } else if (wybor == '2') {
                 IdZalogowanegoUzytkownika = Logowanie(zarejestrowani);
+                WczytajZKsiazkiAdresowejWpis(DaneAdresata, IdZalogowanegoUzytkownika);
             } else if (wybor == '9') {
                 exit(0);
             }
