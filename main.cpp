@@ -44,7 +44,6 @@ void Rejestracja (int IloscUzytkownikow) {
             i++;
         }
     }
-
     cout << "Podaj haslo:";
     cin >> haslo;
     if (zarejestrowani.empty() == true) {
@@ -121,6 +120,7 @@ int OkreslOstatniNrIdUzytkownika (string Linia) {
 
 int Logowanie(vector <Uzytkownik>& zarejestrowani) {
     string nazwa, haslo;
+    cout << ">>> LOGOWANIE <<<" << endl << endl;
     cout << "Podaj nazwe uzytkownika:";
     cin >> nazwa;
 
@@ -150,6 +150,7 @@ int Logowanie(vector <Uzytkownik>& zarejestrowani) {
 
 void ZmianaHasla(vector <Uzytkownik>& zarejestrowani, int IloscUzytkownikow, int IdZalogowanegoUzytkownika) {
     string haslo;
+    cout << ">>> ZMIANA HASLA <<<" << endl << endl;
     cout << "Podaj nowe haslo: ";
     cin >> haslo;
 
@@ -271,6 +272,7 @@ void WypiszDanePrzyjaciela(vector < Przyjaciel > &adresaci, int indeks) {
 
 void wypiszWszystkichAdresatow(vector<Przyjaciel> &adresaci) {
     system("cls");
+    cout << ">>> WSZYSCY ADRESACI <<<" << endl << endl;
     if (!adresaci.empty()) {
         for (vector<Przyjaciel>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++) {
                 cout << "Id:                 " << itr->id << endl;
@@ -289,6 +291,7 @@ void wypiszWszystkichAdresatow(vector<Przyjaciel> &adresaci) {
 
 int WyszukajNazwisko(vector < Przyjaciel > &adresaci) {
     string Nazwisko = "";
+    cout << ">>> WYSZUKAJ: <<<" << endl << endl;
     cout << "Podaj nazwisko przyjaciela:";
     cin >> Nazwisko;
 
@@ -305,6 +308,7 @@ int WyszukajNazwisko(vector < Przyjaciel > &adresaci) {
 
 int WyszukajImie(vector < Przyjaciel > &adresaci) {
     string Imie = "";
+    cout << ">>> WYSZUKAJ: <<<" << endl << endl;
     cout << "Podaj imie przyjaciela:";
     cin >> Imie;
 
@@ -323,7 +327,7 @@ int WyszukajImie(vector < Przyjaciel > &adresaci) {
 
 void DodajDoPlikuTymczasowego (vector < Przyjaciel > &adresaci) {
     fstream plik;
-    plik.open("KsiazkaAdresowaTymczasowa.txt",ios::out|ios::trunc /*| ios::app*/);
+    plik.open("KsiazkaAdresowaTymczasowa.txt",ios::out|ios::trunc);
 
     if (plik.good() == true) {
         for (int i = 0; i < adresaci.size(); i++) {
@@ -338,7 +342,7 @@ void UsunAdresata (vector < Przyjaciel > &adresaci) {
     int id = 0;
     vector<Przyjaciel>::iterator it;
     it = adresaci.begin();
-
+    cout << ">>> USUWANIE ADRESATA <<<" << endl << endl;
     cout << " Podaj ID przyjaciela: ";
     cin >> id;
     for ( int i = 0; i < adresaci.size(); i++) {
@@ -386,7 +390,6 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci) {
                     cin >> Zmiana;
                     itr->Imie = Zmiana;
                     cout << "Imie zostalo zmienione.";
-               //     DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '2':
                     cout << "Wpisz nowe nazwisko: ";
@@ -394,21 +397,18 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci) {
                     itr->Nazwisko = Zmiana;
                     cout << "Nazwisko zostalo zmienione.";
                     break;
-                  //  DodajDoPlikuTymczasowego(adresaci);
                 case '3':
                     cout << "Wpisz nowy numer telefonu: ";
                     cin.sync();
                     getline(cin, Zmiana);
                     itr->NrTelefonu = Zmiana;
                     cout << "Numer telefonu zostal zmieniony.";
-                    DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '4':
                     cout << "Wpisz nowy adres e-mail: ";
                     cin >> Zmiana;
                     itr->Email = Zmiana;
                     cout << "Adres e-mail zostal zmieniony.";
-                   // DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '5':
                     cout << "Wpisz nowy adres zamieszkania: ";
@@ -416,7 +416,6 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci) {
                     getline(cin, Zmiana);
                     itr->Adres = Zmiana;
                     cout << "Adres zamieszkania zostal zmieniony.";
-                   // DodajDoPlikuTymczasowego(adresaci);
                     break;
                 case '6':
                     cout << endl << "Powrot do menu glownego" << endl << endl;
