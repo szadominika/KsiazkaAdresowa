@@ -63,7 +63,7 @@ void Rejestracja (int IloscUzytkownikow) {
         plik << idUzytkownika << "|" << nazwa << "|" << haslo;
         plik << endl;
         plik.close();
-        cout << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
+        cout << endl << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
         Sleep(1000);
     } else {
         cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
@@ -108,59 +108,12 @@ int OkreslOstatniNrIdUzytkownika (string Linia) {
     if (plik.good() == false) {
         IdAdresata = 0;
     }
-
     while (getline(plik, Linia)) {
         Linia = Linia.substr(0, Linia.find(ZnakPodzialu));
         IdAdresata = atoi(Linia.c_str());
     }
     plik.close();
     return IdAdresata;
-}
-
-
-int Logowanie(vector <Uzytkownik>& zarejestrowani) {
-    string nazwa, haslo;
-    cout << ">>> LOGOWANIE <<<" << endl << endl;
-    cout << "Podaj nazwe uzytkownika:";
-    cin >> nazwa;
-
-    int i = 0;
-    while (i < zarejestrowani.size()) {
-        if (zarejestrowani[i].nazwa == nazwa) {
-            for (int proba = 0; proba < 3; proba++) {
-                cout << "Podaj haslo. Pozostalo prob " << 3 - proba << ":";
-                cin >> haslo;
-
-                if (zarejestrowani[i].haslo == haslo) {
-                    cout << "Jestes poprawnie zalogowany.";
-                    Sleep(1000);
-                    return zarejestrowani[i].idUzytkownika;
-                }
-            }
-            cout << "Podale 3 razy bledne haslo. Poczekaj 5 sekund przed klejna proba." << endl;
-            Sleep(5000);
-            return 0;
-        }
-        i++;
-    }
-    cout << "Nie ma uzytkownika o takiej nazwie." << endl;
-    Sleep(3000);
-    return 0;
-}
-
-void ZmianaHasla(vector <Uzytkownik>& zarejestrowani, int IloscUzytkownikow, int IdZalogowanegoUzytkownika) {
-    string haslo;
-    cout << ">>> ZMIANA HASLA <<<" << endl << endl;
-    cout << "Podaj nowe haslo: ";
-    cin >> haslo;
-
-    for ( int i=0; i < IloscUzytkownikow; i++) {
-        if ( zarejestrowani[i].idUzytkownika == IdZalogowanegoUzytkownika) {
-            zarejestrowani[i].haslo = haslo;
-            cout << "Haslo zostalo zmienione." <<  endl;
-            Sleep(1000);
-        }
-    }
 }
 
 Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata, int IdZalogowanegoUzytkownika ) {
@@ -206,6 +159,53 @@ Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata, int IdZalogowanegoU
     plik.close();
     return   pobrane;
 }
+
+int Logowanie(vector <Uzytkownik>& zarejestrowani) {
+    string nazwa, haslo;
+    cout << ">>> LOGOWANIE <<<" << endl << endl;
+    cout << "Podaj nazwe uzytkownika:";
+    cin >> nazwa;
+
+    int i = 0;
+    while (i < zarejestrowani.size()) {
+        if (zarejestrowani[i].nazwa == nazwa) {
+            for (int proba = 0; proba < 3; proba++) {
+                cout << "Podaj haslo. Pozostalo prob " << 3 - proba << ":";
+                cin >> haslo;
+
+                if (zarejestrowani[i].haslo == haslo) {
+                    cout << "Jestes poprawnie zalogowany.";
+                    Sleep(1000);
+                    return zarejestrowani[i].idUzytkownika;
+                }
+            }
+            cout << "Podale 3 razy bledne haslo. Poczekaj 5 sekund przed klejna proba." << endl;
+            Sleep(5000);
+            return 0;
+        }
+        i++;
+    }
+    cout << "Nie ma uzytkownika o takiej nazwie." << endl;
+    Sleep(3000);
+
+    return 0;
+}
+
+void ZmianaHasla(vector <Uzytkownik>& zarejestrowani, int IloscUzytkownikow, int IdZalogowanegoUzytkownika) {
+    string haslo;
+    cout << ">>> ZMIANA HASLA <<<" << endl << endl;
+    cout << "Podaj nowe haslo: ";
+    cin >> haslo;
+
+    for ( int i=0; i < IloscUzytkownikow; i++) {
+        if ( zarejestrowani[i].idUzytkownika == IdZalogowanegoUzytkownika) {
+            zarejestrowani[i].haslo = haslo;
+            cout << "Haslo zostalo zmienione." <<  endl;
+            Sleep(1000);
+        }
+    }
+}
+
 void DopiszAdresataDoPliku (Przyjaciel przyjaciele) {
     fstream plik;
     plik.open("KsiazkaAdresowa.txt",ios::out | ios::app);
@@ -216,7 +216,7 @@ void DopiszAdresataDoPliku (Przyjaciel przyjaciele) {
              << przyjaciele.Adres << "|";
         plik << endl;
         plik.close();
-        cout << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
+        cout << endl << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
         Sleep(1000);
     } else {
         cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
@@ -340,8 +340,6 @@ void DodajDoPlikuTymczasowego (vector < Przyjaciel > &adresaci, int IdZalogowane
     }
     while (getline(plik, DaneAdresata)) {
         WpisWKsiazceAdresowej = DaneAdresata;
-        cout << DaneAdresata;
-         system("pause");
 
         Linia = DaneAdresata.substr(0, DaneAdresata.find(ZnakPodzialu));
         id = atoi(Linia.c_str());
@@ -486,6 +484,7 @@ int main() {
     while(1) {
         if (IdZalogowanegoUzytkownika == 0) {
             system("cls");
+            adresaci.clear();
             cout << "1. Rejestracja" << endl;
             cout << "2. Logowanie" << endl;
             cout << "9. Zakoncz program" << endl;
@@ -497,6 +496,7 @@ int main() {
             } else if (wybor == '2') {
                 IdZalogowanegoUzytkownika = Logowanie(zarejestrowani);
                 WczytajZKsiazkiAdresowejWpis(DaneAdresata, IdZalogowanegoUzytkownika);
+                system("pause");
             } else if (wybor == '9') {
                 exit(0);
             }
