@@ -1,31 +1,62 @@
 #include <iostream>
-#include <windows.h>
 #include <fstream>
+#include <windows.h>
 #include <vector>
+#include <algorithm>
+#include <sstream>
 
 using namespace std;
 
+string NazwaPlikuZUzytkownikami = "DaneUzytkownikow.txt";
+string NazwaPlikuZAdresatami = "KsiazkaAdresowa.txt";
+string NazwaTymczasowegoPlikuZAdresatami = "Adresaci_tymczasowo.txt";
+
 struct Przyjaciel {
-    int id;
-    int idUzytkownika;
-    string Imie;
-    string Nazwisko;
-    string NrTelefonu;
-    string Email;
-    string Adres;
+    int id = 0;
+    int idUzytkownika = 0;
+    string Imie = "";
+    string Nazwisko = "";
+    string NrTelefonu = "";
+    string Email = "";
+    string Adres = "";
 };
 
 struct Uzytkownik {
-    int idUzytkownika;
-    string nazwa, haslo;
+    int idUzytkownika = 0;
+    string nazwa = "", haslo = "";
 };
 
 vector <Przyjaciel> adresaci;
 vector <Uzytkownik> zarejestrowani;
 
+string ZamienPierwszaLitereNaDuzaAPozostaleNaMale(string tekst) {
+    if (!tekst.empty()) {
+        transform(tekst.begin(), tekst.end(), tekst.begin(), ::tolower);
+        tekst[0] = toupper(tekst[0]);
+    }
+    return tekst;
+}
+
 void DodajZarejestrowanegoDoWektora (const int idUzytkownika, const string& nazwa, const string& haslo) {
     zarejestrowani.push_back({idUzytkownika, nazwa, haslo});
 }
+
+void ZapiszUzytkownikowDoPliku (vector <Uzytkownik>& zarejestrowani) {
+
+fstream plik;
+    plik.open(NazwaPlikuZUzytkownikami.c_str(),ios::out);
+
+    if (plik.good() == true) {
+        for (vector <Uzytkownik>::iterator itr = zarejestrowani.begin(); itr != zarejestrowani.end(); itr++) {
+            plik << itr->idUzytkownika << "|" << itr->nazwa << "|" << itr->haslo << "|";
+            plik << endl;
+        }
+        plik.close();
+        cout << endl << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
+        Sleep(1000);
+    } else {
+        cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
+    }}
 
 void Rejestracja (int IloscUzytkownikow) {
     string nazwa, haslo;
@@ -37,7 +68,7 @@ void Rejestracja (int IloscUzytkownikow) {
 
     while (i < zarejestrowani.size()) {
         if (zarejestrowani[i].nazwa == nazwa) {
-            cout << "Taki uzytkownik istnieje, wpisz inna nazwe: ";
+            cout << "Taki uzytkownik istnieje, wpisz inna nazwe: " << endl;
             cin >> nazwa;
             i = 0;
         } else {
@@ -53,29 +84,19 @@ void Rejestracja (int IloscUzytkownikow) {
     }
 
     DodajZarejestrowanegoDoWektora(idUzytkownika, nazwa, haslo);
-    cout << "Konto zostalo poprawnie zalozone.";
+    cout << "Konto zostalo poprawnie zalozone." << endl;
     Sleep(1000);
 
-    fstream plik;
-    plik.open("DaneUzytkownikow.txt",ios::out | ios::app);
-
-    if (plik.good() == true) {
-        plik << idUzytkownika << "|" << nazwa << "|" << haslo;
-        plik << endl;
-        plik.close();
-        cout << endl << "Dane przyjaciela zostaly dodane do ksiazki adresowej";
-        Sleep(1000);
-    } else {
-        cout << "Nie mozna otworzyc pliku: KsiazkaAdresowa.txt" << endl;
-    }
+    ZapiszUzytkownikowDoPliku(zarejestrowani);
 }
+
 Uzytkownik WczytajDaneDoLogowania(string DaneUzytkownika) {
     Uzytkownik pobrane;
     string ZnakPodzialu = "|";
     string Linia;
 
     fstream plik;
-    plik.open("DaneUzytkownikow.txt", ios::in);
+    plik.open(NazwaPlikuZUzytkownikami.c_str(), ios::in);
 
     if (plik.good()==false) {
         cout<<"Nie mozna otworzyc pliku!";
@@ -103,7 +124,7 @@ int OkreslOstatniNrIdUzytkownika (string Linia) {
     string ZnakPodzialu = "|";
 
     fstream plik;
-    plik.open("KsiazkaAdresowa.txt", ios::in);
+    plik.open(NazwaPlikuZAdresatami.c_str(), ios::in);
 
     if (plik.good() == false) {
         IdAdresata = 0;
@@ -122,7 +143,7 @@ Przyjaciel WczytajZKsiazkiAdresowejWpis(string DaneAdresata, int IdZalogowanegoU
     string Linia;
 
     fstream plik;
-    plik.open("KsiazkaAdresowa.txt", ios::in);
+    plik.open(NazwaPlikuZAdresatami.c_str(), ios::in);
 
     if (plik.good()==false) {
         cout<<"Nie mozna otworzyc pliku!";
@@ -192,23 +213,34 @@ int Logowanie(vector <Uzytkownik>& zarejestrowani) {
 }
 
 void ZmianaHasla(vector <Uzytkownik>& zarejestrowani, int IloscUzytkownikow, int IdZalogowanegoUzytkownika) {
-    string haslo;
+    string NoweHaslo;
     cout << ">>> ZMIANA HASLA <<<" << endl << endl;
     cout << "Podaj nowe haslo: ";
-    cin >> haslo;
+    cin >> NoweHaslo;
 
-    for ( int i=0; i < IloscUzytkownikow; i++) {
+   /* for ( int i=0; i < IloscUzytkownikow; i++) {
         if ( zarejestrowani[i].idUzytkownika == IdZalogowanegoUzytkownika) {
             zarejestrowani[i].haslo = haslo;
             cout << "Haslo zostalo zmienione." <<  endl;
             Sleep(1000);
         }
+    }*/
+
+    for (vector <Uzytkownik>::iterator itr = zarejestrowani.begin(); itr != zarejestrowani.end(); itr++)
+    {
+        if (itr -> idUzytkownika == IdZalogowanegoUzytkownika)
+        {
+            itr -> haslo = NoweHaslo;
+            cout << "Haslo zostalo zmienione." << endl << endl;
+            system("pause");
+        }
     }
+    ZapiszUzytkownikowDoPliku(zarejestrowani);
 }
 
 void DopiszAdresataDoPliku (Przyjaciel przyjaciele) {
     fstream plik;
-    plik.open("KsiazkaAdresowa.txt",ios::out | ios::app);
+    plik.open(NazwaPlikuZAdresatami.c_str(),ios::out | ios::app);
 
     if (plik.good() == true) {
         plik << przyjaciele.id << "|" << przyjaciele.idUzytkownika << "|" << przyjaciele.Imie << "|"
@@ -238,10 +270,10 @@ void DodajAdresata (vector <Przyjaciel>& adresaci, int IdZalogowanegoUzytkownika
 
     cout << "Podaj imie: ";
     cin >> Imie;
-    przyjaciele.Imie = Imie;
+    przyjaciele.Imie = ZamienPierwszaLitereNaDuzaAPozostaleNaMale(Imie);
     cout << "Podaj nazwisko: ";
     cin >> Nazwisko;
-    przyjaciele.Nazwisko  = Nazwisko;
+    przyjaciele.Nazwisko  = ZamienPierwszaLitereNaDuzaAPozostaleNaMale(Nazwisko);;
     cout << "Podaj numer telefonu: ";
     cin.sync();
     getline(cin, NrTelefonu);
@@ -297,7 +329,7 @@ int WyszukajNazwisko(vector < Przyjaciel > &adresaci) {
 
     while (!adresaci.empty()) {
         for (int i=0; i < adresaci.size(); i++) {
-            if (adresaci[i].Nazwisko == Nazwisko) {
+            if (adresaci[i].Nazwisko ==   ZamienPierwszaLitereNaDuzaAPozostaleNaMale(Nazwisko)) {
                 WypiszDanePrzyjaciela(adresaci, i);
                 system("pause");
             }
@@ -308,19 +340,32 @@ int WyszukajNazwisko(vector < Przyjaciel > &adresaci) {
 
 int WyszukajImie(vector < Przyjaciel > &adresaci) {
     string Imie = "";
+
     cout << ">>> WYSZUKAJ: <<<" << endl << endl;
     cout << "Podaj imie przyjaciela:";
     cin >> Imie;
 
     while (!adresaci.empty()) {
         for (int i=0; i < adresaci.size(); i++) {
-            if (adresaci[i].Imie == Imie) {
+            if (adresaci[i].Imie == ZamienPierwszaLitereNaDuzaAPozostaleNaMale(Imie)) {
                 WypiszDanePrzyjaciela(adresaci, i);
                 system("pause");
             }
         }
         return 0;
     }
+}
+
+void UsunPlik(string nazwaPlikuZRozszerzeniem) {
+    if (remove(nazwaPlikuZRozszerzeniem.c_str()) == 0) {}
+    else
+        cout << "Nie udalo sie usunac pliku " << nazwaPlikuZRozszerzeniem << endl;
+}
+
+void ZmienNazwePliku(string staraNazwa, string nowaNazwa) {
+    if (rename(staraNazwa.c_str(), nowaNazwa.c_str()) == 0) {}
+    else
+        cout << "Nazwa pliku nie zostala zmieniona." << staraNazwa << endl;
 }
 
 void DodajDoPlikuTymczasowego (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
@@ -332,12 +377,13 @@ void DodajDoPlikuTymczasowego (vector < Przyjaciel > &adresaci, int IdZalogowane
     string Linia = "";
     int id = 0;
     int idUzytkownika = 0;
-    plik.open("KsiazkaAdresowa.txt", ios::in);
-    plikTym.open("KsiazkaAdresowaTymczasowa.txt",ios::out|ios::trunc);
+    plik.open(NazwaPlikuZAdresatami.c_str(), ios::in);
+    plikTym.open(NazwaTymczasowegoPlikuZAdresatami.c_str(),ios::out|ios::trunc);
 
-    if (plik.good()==false) {
+    if (plik.good() == false) {
         cout<<"Nie mozna otworzyc pliku!";
     }
+
     while (getline(plik, DaneAdresata)) {
         WpisWKsiazceAdresowej = DaneAdresata;
 
@@ -364,12 +410,10 @@ void DodajDoPlikuTymczasowego (vector < Przyjaciel > &adresaci, int IdZalogowane
     }
     plikTym.close();
     plik.close();
-    // Usuniecie pliku --> Zmiana nazwy pliku istniejacego
-    remove( "KsiazkaAdresowa.txt" );
-    int ZmienionaNazwaPliku;
-    char StaraNazwa[] ="KsiazkaAdresowaTymczasowa.txt";
-    char NowaNazwa[] ="KsiazkaAdresowa.txt";
-    rename( StaraNazwa , NowaNazwa );
+
+    UsunPlik(NazwaPlikuZAdresatami);
+    ZmienNazwePliku(NazwaTymczasowegoPlikuZAdresatami,NazwaPlikuZAdresatami);
+
 }
 
 void UsunAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
@@ -389,7 +433,7 @@ void UsunAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownik
             }
         }
     }
-     DodajDoPlikuTymczasowego(adresaci, IdZalogowanegoUzytkownika);
+    DodajDoPlikuTymczasowego(adresaci, IdZalogowanegoUzytkownika);
 }
 
 void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkownika) {
@@ -422,13 +466,13 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
                 case '1':
                     cout << "Wpisz nowe imie: ";
                     cin >> Zmiana;
-                    itr->Imie = Zmiana;
+                    itr->Imie = ZamienPierwszaLitereNaDuzaAPozostaleNaMale(Zmiana);
                     cout << "Imie zostalo zmienione.";
                     break;
                 case '2':
                     cout << "Wpisz nowe nazwisko: ";
                     cin >> Zmiana;
-                    itr->Nazwisko = Zmiana;
+                    itr->Nazwisko = ZamienPierwszaLitereNaDuzaAPozostaleNaMale(Zmiana);
                     cout << "Nazwisko zostalo zmienione.";
                     break;
                 case '3':
@@ -467,7 +511,6 @@ void EdytujAdresata (vector < Przyjaciel > &adresaci, int IdZalogowanegoUzytkown
         cout << "Ksiazka adresowa jest pusta." << endl << endl;
     }
     DodajDoPlikuTymczasowego(adresaci, IdZalogowanegoUzytkownika);
-    system("pause");
 }
 
 int main() {
@@ -485,6 +528,7 @@ int main() {
         if (IdZalogowanegoUzytkownika == 0) {
             system("cls");
             adresaci.clear();
+            cout << "    >>> MENU  GLOWNE <<<" << endl << endl;
             cout << "1. Rejestracja" << endl;
             cout << "2. Logowanie" << endl;
             cout << "9. Zakoncz program" << endl;
@@ -496,12 +540,12 @@ int main() {
             } else if (wybor == '2') {
                 IdZalogowanegoUzytkownika = Logowanie(zarejestrowani);
                 WczytajZKsiazkiAdresowejWpis(DaneAdresata, IdZalogowanegoUzytkownika);
-                system("pause");
             } else if (wybor == '9') {
                 exit(0);
             }
         } else {
             system("cls");
+            cout << " >>> MENU UZYTKOWNIKA <<<" << endl << endl;
             cout << "1. Dodaj adresata" << endl;
             cout << "2. Wyszukaj po imieniu" << endl;
             cout << "3. Wyszukaj po nazwisku" << endl;
@@ -509,11 +553,11 @@ int main() {
             cout << "5. Usun adresata" << endl;
             cout << "6. Edytuj adresata" << endl;
             cout << "7. Zmien haslo" << endl;
-            cout << "8. Wyloguj sie" << endl;
-            cout << "9. Zakoncz program" << endl;
+            cout << "8. Wyloguj sie" << endl << endl;
             cout << "Twoj wybor:";
 
             cin >> wybor;
+
             if (wybor == '1') {
                 DodajAdresata (adresaci, IdZalogowanegoUzytkownika);
             } else if (wybor == '2') {
@@ -530,8 +574,6 @@ int main() {
                 ZmianaHasla(zarejestrowani, IloscUzytkownikow, IdZalogowanegoUzytkownika);
             } else if (wybor == '8') {
                 IdZalogowanegoUzytkownika = 0;
-            } else if (wybor == '9') {
-                exit(0);
             }
         }
     }
